@@ -1,0 +1,7 @@
+// FreeLang v2 기본 예제
+// 출력: Hello, FreeLang v2!
+
+fn main(): void {
+  print("Hello, FreeLang v2!")
+  print("Welcome to the pure implementation language")
+}

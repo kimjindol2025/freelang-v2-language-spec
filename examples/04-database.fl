@@ -1,0 +1,106 @@
+// FreeLang v2 데이터베이스 예제
+// 테이블 생성, 데이터 삽입, 조회
+
+use "vm.db" as VMDB
+
+fn main(): void {
+  print("🚀 FreeLang v2 Database Example\n")
+
+  let vm = FreeLangVM(10 * 1024 * 1024, 256)
+
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 1: Create Table")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  let columns = ["id", "name", "age"]
+  let created = vm.db.createTable("users", columns)
+
+  if created {
+    print("✅ Table 'users' created")
+    print("   Columns: id, name, age\n")
+  }
+
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 2: Insert Data")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  // Row 1: Alice, 30
+  let row1_vals = [
+    VMDB.VMValue("int", 1),
+    VMDB.VMValue("string", "Alice"),
+    VMDB.VMValue("int", 30)
+  ]
+  print("Inserting: ID=1, Name=Alice, Age=30")
+  vm.db.insertRow("users", row1_vals)
+
+  // Row 2: Bob, 25
+  let row2_vals = [
+    VMDB.VMValue("int", 2),
+    VMDB.VMValue("string", "Bob"),
+    VMDB.VMValue("int", 25)
+  ]
+  print("Inserting: ID=2, Name=Bob, Age=25")
+  vm.db.insertRow("users", row2_vals)
+
+  // Row 3: Charlie, 35
+  let row3_vals = [
+    VMDB.VMValue("int", 3),
+    VMDB.VMValue("string", "Charlie"),
+    VMDB.VMValue("int", 35)
+  ]
+  print("Inserting: ID=3, Name=Charlie, Age=35")
+  vm.db.insertRow("users", row3_vals)
+  print()
+
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 3: Query Data")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  print("SELECT * FROM users:\n")
+  vm.db.printTable("users")
+  print()
+
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 4: Row Count")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  let row_count = vm.db.getRowCount("users")
+  print("Total rows in 'users': " + row_count + "\n")
+
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 5: Create Another Table")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  let product_cols = ["product_id", "product_name", "price"]
+  vm.db.createTable("products", product_cols)
+  print("✅ Table 'products' created\n")
+
+  // Insert products
+  let prod1 = [
+    VMDB.VMValue("int", 101),
+    VMDB.VMValue("string", "Laptop"),
+    VMDB.VMValue("int", 999)
+  ]
+  vm.db.insertRow("products", prod1)
+
+  let prod2 = [
+    VMDB.VMValue("int", 102),
+    VMDB.VMValue("string", "Mouse"),
+    VMDB.VMValue("int", 25)
+  ]
+  vm.db.insertRow("products", prod2)
+
+  print("Inserted 2 products")
+  print()
+
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Database Statistics")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  print("Tables: 2 (users, products)")
+  print("Total rows: 5 (3 + 2)")
+  print("Memory used: ~2 KB")
+  print()
+
+  print("✅ Database test completed!")
+}

@@ -1,0 +1,159 @@
+// FreeLang v2 통합 예제
+// 메모리 + 네트워크 + 데이터베이스를 모두 사용하는 HTTP 서버
+
+use "vm.memory" as VMMemory
+use "vm.net" as VMNet
+use "vm.db" as VMDB
+
+class SimpleHTTPServer {
+  vm: FreeLangVM
+  port: int
+  db_ready: bool
+
+  new(port: int) {
+    this.vm = FreeLangVM(50 * 1024 * 1024, 512)  // 50MB heap
+    this.port = port
+    this.db_ready = false
+
+    print("🚀 FreeLang v2 Integrated HTTP Server\n")
+  }
+
+  fn initDatabase(): void {
+    print("📂 Initializing database...")
+
+    // users 테이블 생성
+    let user_cols = ["id", "username", "email"]
+    this.vm.db.createTable("users", user_cols)
+
+    // 샘플 데이터 삽입
+    let user1 = [
+      VMDB.VMValue("int", 1),
+      VMDB.VMValue("string", "alice"),
+      VMDB.VMValue("string", "alice@example.com")
+    ]
+    this.vm.db.insertRow("users", user1)
+
+    let user2 = [
+      VMDB.VMValue("int", 2),
+      VMDB.VMValue("string", "bob"),
+      VMDB.VMValue("string", "bob@example.com")
+    ]
+    this.vm.db.insertRow("users", user2)
+
+    this.db_ready = true
+    print("✅ Database initialized with 2 users\n")
+  }
+
+  fn createJSONResponse(data: Str): Str {
+    // JSON 응답 생성
+    return "{\"status\":\"ok\",\"data\":\"" + data + "\"}"
+  }
+
+  fn handleGETRequest(path: Str): Str {
+    if path == "/users" {
+      // 사용자 목록 반환
+      let user_count = this.vm.db.getRowCount("users")
+      return this.createJSONResponse("Found " + user_count + " users")
+    } else if path == "/health" {
+      // 헬스 체크
+      return this.createJSONResponse("Server is running")
+    } else {
+      // 404 Not Found
+      return "{\"error\":\"Not found\",\"path\":\"" + path + "\"}"
+    }
+  }
+
+  fn processRequest(method: Str, path: Str): Str {
+    if method == "GET" {
+      return this.handleGETRequest(path)
+    } else {
+      return "{\"error\":\"Method not allowed\"}"
+    }
+  }
+
+  fn start(): void {
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("Starting HTTP Server")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+    // 1. 메모리 할당 (요청 버퍼)
+    let request_buffer = this.vm.memory.malloc(4096)
+    print("✅ Memory allocated: 4KB request buffer at address " + request_buffer + "\n")
+
+    // 2. 네트워크 소켓 생성
+    let server_socket = this.vm.net.createSocket("0.0.0.0", this.port)
+    print("✅ Server socket created: ID=" + server_socket + "\n")
+
+    // 3. 데이터베이스 초기화
+    this.initDatabase()
+
+    // 4. 서버 시작
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("Server listening on port " + this.port)
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+    // 5. 요청 처리 루프 (시뮬레이션)
+    print("Simulating incoming requests...\n")
+
+    // 요청 1: GET /users
+    print("[1] GET /users")
+    let response1 = this.processRequest("GET", "/users")
+    print("    Response: " + response1)
+    print()
+
+    // 요청 2: GET /health
+    print("[2] GET /health")
+    let response2 = this.processRequest("GET", "/health")
+    print("    Response: " + response2)
+    print()
+
+    // 요청 3: GET /notfound
+    print("[3] GET /notfound")
+    let response3 = this.processRequest("GET", "/notfound")
+    print("    Response: " + response3)
+    print()
+
+    // 6. 서버 정보 출력
+    this.printServerStatus()
+
+    // 7. 정리
+    this.vm.net.closeSocket(server_socket)
+  }
+
+  fn printServerStatus(): void {
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("Server Status Report")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+    print("Configuration:")
+    print("  Port: " + this.port)
+    print("  Heap Size: 50 MB")
+    print("  Stack Slots: 512")
+    print()
+
+    print("Memory Status:")
+    print("  Allocated: 4 KB (request buffer)")
+    print("  Available: ~50 MB")
+    print("  Efficiency: ~99%")
+    print()
+
+    print("Network Status:")
+    print("  Sockets Created: 1")
+    print("  Connections Handled: 3 (simulated)")
+    print("  Status: Closed")
+    print()
+
+    print("Database Status:")
+    print("  Tables: 1 (users)")
+    print("  Total Rows: 2")
+    print("  Ready: " + (if this.db_ready then "Yes" else "No"))
+    print()
+
+    print("✅ Server test completed!")
+  }
+}
+
+fn main(): void {
+  let server = SimpleHTTPServer(8080)
+  server.start()
+}

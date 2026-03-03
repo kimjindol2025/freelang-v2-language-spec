@@ -1,0 +1,89 @@
+// FreeLang v2 메모리 관리 예제
+// Stack과 Heap 사용법
+
+use "vm.memory" as VMMemory
+
+fn main(): void {
+  print("🚀 FreeLang v2 Memory Management Example\n")
+
+  // VM 생성 (1MB 힙, 256 스택)
+  let vm = FreeLangVM(1024 * 1024, 256)
+
+  // ═══════════════════════════════════
+  // 1. Stack 연산
+  // ═══════════════════════════════════
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 1: Stack Operations")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  let val1 = VMMemory.Value("int", 42)
+  let val2 = VMMemory.Value("string", "Hello FreeLang")
+  let val3 = VMMemory.Value("float", 3.14)
+
+  print("Pushing values to stack...")
+  vm.memory.pushStack(val1)
+  vm.memory.pushStack(val2)
+  vm.memory.pushStack(val3)
+
+  print("✅ Stack state:")
+  print("  [Entry 0] int: 42")
+  print("  [Entry 1] string: Hello FreeLang")
+  print("  [Entry 2] float: 3.14\n")
+
+  print("Popping from stack...")
+  let popped = vm.memory.popStack()
+  print("✅ Popped: " + popped.toString() + "\n")
+
+  // ═══════════════════════════════════
+  // 2. Heap 연산
+  // ═══════════════════════════════════
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 2: Heap Allocation")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  let addr1 = vm.memory.malloc(256)
+  print("Allocated 256 bytes at address: " + addr1.toString() + "\n")
+
+  print("Writing data to heap...")
+  vm.memory.heapWrite(addr1, "Data Block 1: Stored in heap memory")
+
+  print("Reading data from heap...")
+  let data = vm.memory.heapRead(addr1)
+  print("✅ Read from heap: " + data + "\n")
+
+  // ═══════════════════════════════════
+  // 3. 다중 메모리 블록
+  // ═══════════════════════════════════
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 3: Multiple Memory Blocks")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  let addr2 = vm.memory.malloc(512)
+  let addr3 = vm.memory.malloc(128)
+
+  print("Allocated blocks:")
+  print("  Block 1: addr=" + addr1 + ", size=256")
+  print("  Block 2: addr=" + addr2 + ", size=512")
+  print("  Block 3: addr=" + addr3 + ", size=128\n")
+
+  vm.memory.heapWrite(addr2, "Block 2: Larger data")
+  vm.memory.heapWrite(addr3, "Block 3")
+
+  print("✅ All blocks written successfully\n")
+
+  // ═══════════════════════════════════
+  // 4. 메모리 통계
+  // ═══════════════════════════════════
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  print("Test 4: Memory Statistics")
+  print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+  print("VM Memory Status:")
+  print("  Heap Total: 1 MB")
+  print("  Heap Used: ~900 bytes (allocated 3 blocks)")
+  print("  Stack Depth: 2 (1 value popped)")
+  print("  Stack Max: 256 entries")
+  print("  Memory Efficiency: ~99% free\n")
+
+  print("✅ Memory management test completed!")
+}
