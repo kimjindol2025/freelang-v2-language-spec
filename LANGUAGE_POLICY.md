@@ -1,8 +1,8 @@
 # FreeLang v2 언어 정책 (Language Policy)
 
-**Version**: 2.0.0
-**Status**: Official Policy
-**Date**: 2026-03-03
+**Version**: 2.1.0
+**Status**: Official Policy with HTTP Support
+**Date**: 2026-03-03 (Updated: 2026-03-03)
 
 ---
 
@@ -182,6 +182,66 @@ let json_obj = vm.json.parse(file_data)     // 인메모리 파싱
 vm.db.insertRows("table", json_obj.rows)   // 동일 형식으로 저장
 // 메모리 재할당 0회, 데이터 복사 0회
 ```
+
+---
+
+### 1.6 네트워크 & HTTP 모듈
+
+**목적**: 웹 서버, REST API, 실시간 통신을 **순수 FreeLang**으로 구현 가능
+
+**아키텍처**:
+```
+Application Layer
+     ↓
+HTTP Module (@freelang/http-server)
+  - Request 파싱
+  - Router (GET/POST/PUT/DELETE)
+  - Response 빌더 (JSON/HTML/Text)
+     ↓
+Network Layer (@freelang/network)
+  - TCP/UDP 소켓
+  - 포트 바인딩
+  - 패킷 송수신
+     ↓
+VM Memory
+  - 버퍼 관리
+  - Zero-copy 데이터 처리
+```
+
+**HTTP 지원 범위**:
+
+| 기능 | 구현 | 상태 |
+|------|------|------|
+| HTTP/1.1 파싱 | ✅ 요청/응답 | v1.0.0 |
+| REST 라우팅 | ✅ GET/POST/PUT/DELETE | v1.0.0 |
+| 응답 포맷 | ✅ JSON/HTML/Text | v1.0.0 |
+| 미들웨어 | 🔄 인증/CORS | v1.1.0 |
+| WebSocket | 📅 실시간 통신 | v2.0.0 |
+| HTTP/2 | 📅 멀티플렉싱 | v2.0.0 |
+
+**사용 예시**:
+```freelang
+use "http-module" as HTTP
+
+fn main(): void {
+  let server = HTTP.Server(8080)
+
+  server.route()
+    .get("/api/users", fn(req) {
+      return HTTP.ok("[{\"id\":1,\"name\":\"Alice\"}]")
+    })
+    .post("/api/users", fn(req) {
+      return HTTP.created("{\"id\":2,\"name\":\"Bob\"}")
+    })
+
+  server.listen(nil)
+}
+```
+
+**원칙**:
+- ✅ 핵심 로직: 순수 FreeLang (HTTP 파싱, 라우팅)
+- ⚠️ I/O: FFI 가능 (포트 바인딩, 소켓 연결)
+- ✅ 응답: 완전히 순수 FreeLang
 
 ---
 
